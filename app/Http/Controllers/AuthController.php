@@ -3,6 +3,8 @@
 
 // app/Http/Controllers/AuthController.php
 namespace App\Http\Controllers;
+
+use App\Models\bookdetailcollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -68,7 +70,77 @@ class AuthController extends Controller
         return back()->with('error', 'Invalid login details');
     }
 
-    public function home(){
-        return view('home');
+    public function logout(){
+        Auth::logout();
+        return redirect(route('login'))->with('success', 'Logged out successfully!');
     }
+
+    public function home(){
+        // Rendering books from the database
+        $books = bookdetailcollection::all();
+        return view('home' , compact('books'));
+    }
+
+    public function homePost(Request $request){
+        request()->validate([
+            'bookname' => 'required',
+            'author' => 'required',
+            'price' => 'required',
+            'description' => 'required',
+            'image' => 'required',
+        ]);
+        // Store user in the database
+        bookdetailcollection::create([
+            'bookname' => $request->bookname,
+            'author' => $request->author,
+            'price' => $request->price,
+            'description' => $request->description,
+            'image' => $request->file('image')->store('images','public'),
+        ]);
+        return  back()->with('success', 'Book added successfully!');
+        
+    }
+
+    public function delete($id){
+        bookdetailcollection::destroy($id);
+        return back()->with('success', 'Book deleted successfully!');
+    }
+
+    public function edit($id){
+        $book = bookdetailcollection::find($id);
+        return view('edit',compact('book'));
+    }
+
+    public function update(Request $request, $id)
+        {
+    $request->validate([
+        'bookname' => 'required|string|max:255',
+        'author' => 'required|string|max:255',
+        'price' => 'required|numeric',
+        'description' => 'nullable|string',
+    ]);
+
+    $book = bookdetailcollection::findOrFail($id);
+    $book->update($request->all());
+
+    return redirect()->route('user.home', $id)->with('success', 'Book updated successfully!');
+}
+
+    // public function editpost($id){
+    //     request()->validate([
+    //         'bookname' => 'required',
+    //         'author' => 'required',
+    //         'price' => 'required',
+    //         'description' => 'required',
+    //         'image' => 'required',
+    //     ]);
+    //     $book = bookdetailcollection::find($id);
+    //     $book->bookname = request('bookname');
+    //     $book->author = request('author');
+    //     $book->price = request('price');
+    //     $book->description = request('description');
+    //     $book->image = request()->file('image')->store('images','public');
+    //     $book->save();
+    //     return redirect(route('user.home'))->with('success', 'Book updated successfully!');
+    // }
 }

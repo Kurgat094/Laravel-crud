@@ -9,7 +9,16 @@
     <form action="{{ route('loginpost') }}" method="post">
         @csrf
         <div class="card">
-                <h1 class="text-3xl font-bold text-center mb-6">Login </h1>
+            @if ($errors->any())
+                <div class="bg-red-500 text-white p-4 rounded mb-4">
+                    <ul class="alert alert-danger">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+                        <h1 class="text-3xl font-bold text-center mb-6">Login </h1>
 
                 <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
                 <input type="email" name="email" id="email" class="w-full border border-gray-300 rounded-lg p-2" placeholder="Enter your email" required>

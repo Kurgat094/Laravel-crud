@@ -9,6 +9,15 @@
     <form action="{{ route('registerpost') }}" method="post">
         @csrf
         <div class="card">
+                @if ($errors->any())
+                    <div class="bg-red-500 text-white p-4 rounded mb-4">
+                        <ul class="alert alert-danger">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <h1 class="text-3xl font-bold text-center mb-6">Sign Up</h1>
 
                 <label for="name" class="block text-gray-700 font-medium mb-2">Full Name</label>

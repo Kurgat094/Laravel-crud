@@ -13,31 +13,41 @@
 <body>
 <header>
         <nav>
+            @if ($errors->any())
+                <div class="bg-red-500 text-white p-4 rounded mb-4">
+                    <ul class="alert alert-danger">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+
+            @if (session('success'))
+            <div class="bg-green-500 text-white p-4 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
             <ul>
                 <li><a href="#">Home</a></li>
                 <li><a href="#about">About Me</a></li>
                 <li><a href="#projects">Projects</a></li>
                 <li><a href="#contact">Contact</a></li>
+                
+                @auth 
+                <li><a href="/logout">Logout</a></li>
+                @else
+                <li><a href="/login">Login</a></li>
+                @endauth
             </ul>
         </nav>
     </header>
 
     <main>
-        @if (session('success'))
-            <div class="bg-green-500 text-white p-4 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
+        
 
-        @if ($errors->any())
-            <div class="bg-red-500 text-white p-4 rounded mb-4">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+       
 
         @yield('content')
     </main>
