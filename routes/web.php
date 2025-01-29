@@ -14,6 +14,8 @@ use Illuminate\Container\Attributes\Auth;
 
 Route::get('/',[AuthController::class,'register'])->name('register');
 Route::post('/registerpost', [AuthController::class, 'registerPost'])->name('registerpost');
+Route::get('/otp',[AuthController::class, 'otp'])->name('otp');
+Route::post('/verify',[AuthController::class,'verify_otp'])->name('verify');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/loginpost', [AuthController::class, 'loginpost'])->name('loginpost');
 Route::get('/home',[AuthController::class,'home'])->name('user.home');

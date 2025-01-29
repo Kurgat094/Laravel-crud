@@ -4,11 +4,16 @@
 // app/Http/Controllers/AuthController.php
 namespace App\Http\Controllers;
 
+use App\Mail\Otpmail;
 use App\Models\bookdetailcollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Contracts\Mail\Mailable;
+use App\Mail\WelcomeMail;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -27,16 +32,55 @@ class AuthController extends Controller
         ]);
 
         // Store user in the database
+        // otp variable
+        $otp=random_int(000000,999999);
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password), // Hash the password
+            'otp' => $otp,
+            'otp_expires_at' => Carbon::now()->addMinutes(1), 
         ]);
+        $user = $request->name;
+        //send the welcome email
+        Mail::to($request->email)->send(new Otpmail($otp));
 
         // Redirect with success message
-        return redirect('/login')->with('success', 'Account created successfully!');
+        return redirect('/otp')->with('success', 'Account created successfully!');
     }
-    
+    public function otp(){
+        return view('otp');
+    }
+
+
+public function verify_otp(Request $request)
+{
+    // Validate the input
+    $request->validate([
+        'otp' => 'required|integer',
+    ]);
+
+    // Find the user with the given OTP
+    $user = User::where('otp', $request->otp)->first();
+
+    if (!$user) {
+        return back()->with('error', 'Incorrect OTP');
+    }
+
+    // Check if OTP is expired
+    if ($user->otp_expires_at && Carbon::now()->greaterThan($user->otp_expires_at)) {
+        return back()->with('error', 'OTP has expired. Please request a new one.');
+    }
+
+    // Verify the OTP
+    $user->otp = null; // Clear OTP after verification
+    $user->otp_expires_at = null;
+    $user->is_verified = 1; // Mark user as verified
+    $user->save();
+
+    return redirect()->route('login')->with('success', 'Account has been verified successfully!');
+}
+
 
     public function login(){
         return view('signin');
@@ -126,21 +170,5 @@ class AuthController extends Controller
     return redirect()->route('user.home', $id)->with('success', 'Book updated successfully!');
 }
 
-    // public function editpost($id){
-    //     request()->validate([
-    //         'bookname' => 'required',
-    //         'author' => 'required',
-    //         'price' => 'required',
-    //         'description' => 'required',
-    //         'image' => 'required',
-    //     ]);
-    //     $book = bookdetailcollection::find($id);
-    //     $book->bookname = request('bookname');
-    //     $book->author = request('author');
-    //     $book->price = request('price');
-    //     $book->description = request('description');
-    //     $book->image = request()->file('image')->store('images','public');
-    //     $book->save();
-    //     return redirect(route('user.home'))->with('success', 'Book updated successfully!');
-    // }
+   
 }

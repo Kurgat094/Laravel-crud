@@ -9,6 +9,12 @@
     <form action="{{ route('registerpost') }}" method="post">
         @csrf
         <div class="card">
+            @if (session('success'))
+            <div class="bg-green-500 text-white p-4 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+
                 @if ($errors->any())
                     <div class="bg-red-500 text-white p-4 rounded mb-4">
                         <ul class="alert alert-danger">
